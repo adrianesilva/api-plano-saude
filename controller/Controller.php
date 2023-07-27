@@ -58,10 +58,10 @@ class Controller extends Planos
 
     private function consultaPrecosBeneficiario($dados) : array
     {
-
+        
         for($i=1;$i<=$dados['qtdBeneficiarios'];$i++)
         {
-
+            
             $nome = $dados['beneficiario'.$i];
             $idade = $dados['idade'.$i];
             $faixa = $this->getFaixaIdade($idade);
@@ -73,8 +73,8 @@ class Controller extends Planos
                 
                 foreach($this->consultaPrecos($codigo) as $preco)
                 {
-
-                    if($dados['qtdBeneficiarios'] >= $preco['minimo_vidas'] && $dados['qtdBeneficiarios']>1 && $preco['minimo_vidas']>1)
+    
+                    if($dados['qtdBeneficiarios'] >= $preco['minimo_vidas'] && $dados['qtdBeneficiarios']>1 && $preco['minimo_vidas']>=1)
                     {
 
                        $precoBenef = $preco['faixa'.$faixa];
@@ -93,26 +93,43 @@ class Controller extends Planos
                 $resultado[$i]['preco']=$precoBenef;
                 $resultado[$i]['idade']=$idade;
                 $resultado[$i]['plano']=$this->consultaNomePlano($codigo);
+               
 
             }
 
-
+             
         }
+
+        $resultado[$dados['qtdBeneficiarios']+1]['preco_total'] = $this->somaPrecoTotal($resultado);
 
         return $resultado;
 
     }
 
+    private function somaPrecoTotal($resultado) : float
+    {
+        $soma=0;
 
-    public function salvarDados() : json
+        foreach($resultado as $r){
+
+            $soma = $soma + $r['preco'];
+
+        }
+
+        return $soma;
+
+    }
+
+
+    public function salvarDados() : void
     {
 
         header('Content-Type: application/json');
 
         if($_SERVER['REQUEST_METHOD'] == 'POST')
         {
-            $qtdBeneficiarios = $_REQUEST['qtdBeneficiarios'];
-            $plano= $_REQUEST['registroPlano'];
+            $qtdBeneficiarios = ($_REQUEST['qtdBeneficiarios']  ?: die(json_encode(["Erro"=>"Quantidade de beneficiários não pode ser vazio"])) );
+            $plano= ($_REQUEST['registroPlano']  ?: die(json_encode(["Erro"=>"Plano não pode ser vazio"])) );
             $a=array();
 
             if($this->verificaPlano($plano))
@@ -122,21 +139,45 @@ class Controller extends Planos
 
                 for($i=1;$i<=$qtdBeneficiarios;$i++)
                 {
-
-                    ($i==$qtdBeneficiarios) ? $beneficiarios .=  $_REQUEST['beneficiario'.$i] : $nomes .=  $_REQUEST['beneficiario'.$i].",";
-                    ($i==$qtdBeneficiarios) ? $idades .=  $_REQUEST['idade'.$i] : $idades .=  $_REQUEST['idade'.$i].",";
-                    
-                    $a['beneficiario'.$i]=$_REQUEST['beneficiario'.$i];
-                    $a['idade'.$i]=$_REQUEST['idade'.$i];
+                    $a['beneficiario'.$i]= ($_REQUEST['beneficiario'.$i] ?: die(json_encode(["Erro"=>"Nome do beneficiário não pode ser vazio"])) );
+                    $a['idade'.$i]= ($_REQUEST['idade'.$i] ?: die(json_encode(["Erro"=>"Idade não pode ser vazia"])) );
                 }
-               
-                echo json_encode( $this->consultaPrecosBeneficiario($a));
+
+                $result = json_encode( $this->consultaPrecosBeneficiario($a));
             }else
             {
                 $a["Erro"]="Registro do Plano não existe!";
-                echo json_encode($a);
+                $result = json_encode($a);
             }
+
+            echo $result;
         }
+
+       $this->salvaPropostaJson($result);
+
+
+    }
+
+    private function salvaPropostaJson($result) : void
+    {
+
+        $file = './models/proposta.json';
+
+        $proposta = file_get_contents($file);
+
+        $propostaArray = json_decode($proposta, true);
+
+        if(sizeof($propostaArray) == 0) $propostaArray  = [];
+
+        $jsonArray = (sizeof($result)>0) ? json_decode($result,true): '';
+
+        $i = sizeof($propostaArray)+1;
+
+        if(is_array($jsonArray)) array_push($propostaArray,$jsonArray);
+        
+        $arrayJson = json_encode($propostaArray);
+
+       file_put_contents($file, $arrayJson);
 
     }
     

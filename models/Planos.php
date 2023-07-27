@@ -6,7 +6,7 @@ class Planos
     /**
      * Consulta da tabela Planos, retorno em array
      */
-    public function consultaPlanos() : array
+    protected function consultaPlanos() : array
     {
         $planos = file_get_contents('models/plans.json');
         $planos = json_decode($planos,true);
@@ -18,11 +18,12 @@ class Planos
     /**
      * Consulta da tabela Preços, retorno em array
      */
-    public function consultaPrecos($codigo) : array
+    protected function consultaPrecos($codigo) : array
     {
         $precos = file_get_contents('models/prices.json');
         $precos = json_decode($precos,true);
-
+        $i=0;
+        
         foreach($precos as $pr)
         {
             if($pr['codigo'] == $codigo)
@@ -46,7 +47,7 @@ class Planos
      /**
      * 
      */
-    public function consultaNomePlano($codigo) : string
+    protected function consultaNomePlano($codigo) : string
     {
         $planos = file_get_contents('models/plans.json');
         $planos = json_decode($planos,true);
@@ -62,7 +63,7 @@ class Planos
         
     }
 
-    public function consultaPlanosCodigo($plano) : int
+    protected function consultaPlanosCodigo($plano) : int
     {
         $planos = file_get_contents('models/plans.json');
         $planos = json_decode($planos,true);
@@ -77,5 +78,19 @@ class Planos
         return $codigo;
         
     }
+
+    protected function consultaPropostas() : array
+    {
+
+        $propostas = file_get_contents('models/proposta.json');
+        $propostas = json_decode($propostas,true);
+
+        if(!$propostas) $propostas = [];
+  
+        return $propostas;
+
+    }
+
+    
 
 }

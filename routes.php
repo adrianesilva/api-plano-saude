@@ -21,11 +21,7 @@ switch($url[1])
     case 'cadastro':
         $controller->salvarDados();
         break;
-
-    case 'teste':
-        $controller->consultaPlanos();
-        break;
-
+        
     default:
         echo "<p>Pagina não Existe...</p>";
 

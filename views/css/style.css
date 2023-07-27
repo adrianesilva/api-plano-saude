@@ -1,0 +1,23 @@
+h3{
+    color: rgb(43, 92, 197);
+}
+
+table{
+  border: 1px solid rgb(71, 157, 255);
+}
+
+tr, th, td {
+    border: 1px solid rgb(71, 157, 255);
+}
+
+th{
+    text-align: left;
+}
+
+.med{
+    width: 250px;
+}
+
+.peq{
+    width: 120px;
+}
