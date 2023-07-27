@@ -141,6 +141,8 @@ class Controller extends Planos
                 {
                     $a['beneficiario'.$i]= ($_REQUEST['beneficiario'.$i] ?: die(json_encode(["Erro"=>"Nome do beneficiário não pode ser vazio"])) );
                     $a['idade'.$i]= ($_REQUEST['idade'.$i] ?: die(json_encode(["Erro"=>"Idade não pode ser vazia"])) );
+
+                    $this->verificaDuplicidade($a['beneficiario'.$i],$a['idade'.$i]);
                 }
 
                 $result = json_encode( $this->consultaPrecosBeneficiario($a));
@@ -151,10 +153,9 @@ class Controller extends Planos
             }
 
             echo $result;
+
+            $this->salvaPropostaJson($result);
         }
-
-       $this->salvaPropostaJson($result);
-
 
     }
 
@@ -169,7 +170,7 @@ class Controller extends Planos
 
         if(sizeof($propostaArray) == 0) $propostaArray  = [];
 
-        $jsonArray = (sizeof($result)>0) ? json_decode($result,true): '';
+        $jsonArray = ($result) ? json_decode($result,true): '';
 
         $i = sizeof($propostaArray)+1;
 
@@ -179,6 +180,34 @@ class Controller extends Planos
 
        file_put_contents($file, $arrayJson);
 
+    }
+
+    public function consulta() 
+    {
+        header('Content-Type: application/json');
+
+        $json = json_encode($this->consultaPropostas());
+
+        return $json;
+    }
+
+    private function verificaDuplicidade($beneficiario, $idade)
+    {
+
+        foreach($this->consultaPropostas() as $propostas)
+        {
+
+            $propostas = array_chunk($propostas, sizeof($propostas)-1);
+        
+            foreach ($propostas[0] as $p) 
+            {
+                if ($p['nome'] == $beneficiario && $p['idade'] == $idade){
+
+                    die(json_encode(["Erro"=>"Beneficiario Já Cadastrado"]));
+                }
+            }
+
+        }
     }
     
 

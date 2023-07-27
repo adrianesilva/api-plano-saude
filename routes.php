@@ -12,17 +12,24 @@ if($url[0] != 'planos')
     exit;
 } 
 
-switch($url[1])
+if(isset($url[1]))
 {
-    case 'historico':
-        $controller->exibeHistorico();
-        break;
+    switch($url[1])
+    {
+        case 'historico':
+            $controller->exibeHistorico();
+            break;
 
-    case 'cadastro':
-        $controller->salvarDados();
-        break;
-        
-    default:
-        echo "<p>Pagina não Existe...</p>";
+        case 'cadastro':
+            $controller->salvarDados();
+            break;
 
+        case 'consulta':
+            echo $controller->consulta();
+            break;
+            
+        default:
+            echo "<p>Pagina não Existe...</p>";
+
+    }
 }
